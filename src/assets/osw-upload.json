@@ -1,0 +1,14 @@
+{
+  "tdei_org_id": "2CA2AA83-B99A-42E2-90AA-C187EAC48FEB",
+  "collected_by": "6D3E5B8C-FB16-4B6A-9436-72FD24756CC9",
+  "collection_date": "2022-11-22T09:43:07.978Z",
+  "collection_method": "manual",
+  "valid_from": "2022-11-22T09:43:07.978Z",
+  "valid_to": "2022-11-22T09:43:07.978Z",
+  "data_source": "local",
+  "osw_schema_version": "1.0.0",
+  "file_upload_path": "https://tdeisamplestorage.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip",
+  "user_id": "101-1-2-2111",
+  "tdei_record_id": "4CA2AA83-B99A-1234-90AA-C187EAC48FEB",
+  "polygon": {}
+}
