@@ -1,13 +1,13 @@
-# TDEI-GTFS-Pathways-Validation
+# TDEI-OSW-Validation
 
 ## Introduction 
-Service to Validate the GTFS Pathways file that is uploaded. At the moment, the service does the following:
-- Listens to the topic _gtfs-pathways-upload_ for any new message (that is triggered when a file is uploaded)
+Service to Validate the OSW file that is uploaded. At the moment, the service does the following:
+- Listens to the topic _osw-upload_ for any new message (that is triggered when a file is uploaded)
 - Consumes the message and checks the filename in the message
   - if the filename contains the word _valid_ returns **valid** as the result
   - if the filename contains the word _invalid_ returns **invalid** as the result
   - if the file name does not contain either, it will return **invalid** as the result
-- Publishes the result to the topic _gtfs-pathways-validation_
+- Publishes the result to the topic _osw-validation_
 
 ## Getting Started
 The project is built on top of NodeJS framework. All the regular nuances for a NodeJS project are valid for this.
