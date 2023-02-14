@@ -18,6 +18,18 @@ The project is built on top of NodeJS framework. All the regular nuances for a N
 | NodeJS | 16.17.0|
 | Typescript | 4.8.2 |
 
+### Environment variables
+|Name| Description |
+|--|--|
+| PROVIDER | Provider for cloud service or local |
+|QUEUECONNECTION | Queue connection string |
+|STORAGECONNECTION | Storage connection string|
+|APPLICATION_PORT |Port on which application will run|
+|UPLOAD_SUBSCRIPTION | Upload topic subscription name|
+|UPLOAD_TOPIC | Upload topic name|
+|VALIDATION_TOPIC | Validation topic name|
+|EVENT_BUS_CONNECTION | Event bus connection string|
+|AUTH_PERMISSION_URL | Authentication/Authorization url|
 
 ### Build and Test
 Follow the steps to install the node packages required for both building and running the application

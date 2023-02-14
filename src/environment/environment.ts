@@ -13,5 +13,6 @@ export const environment = {
         uploadSubscription: process.env.UPLOAD_SUBSCRIPTION,
         validationTopic: process.env.VALIDATION_TOPIC,
     },
-    appPort: parseInt(process.env.PORT as string) || 3000
+    appPort: parseInt(process.env.APPLICATION_PORT ?? "8080"),
+    authPermissionUrl: process.env.AUTH_PERMISSION_URL
 }

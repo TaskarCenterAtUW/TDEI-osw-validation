@@ -1,17 +1,11 @@
-export interface Polygon {
-    type: string
-    features: Feature[]
-}
+import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 
-export interface Feature {
-    type: string
-    properties: OswProperties
-    geometry: Geometry
-}
+export class PolygonDto extends AbstractDomainEntity {
+    @Prop()
+    coordinates: Array<Array<number[]>> = [];
 
-export interface OswProperties { }
-
-export interface Geometry {
-    type: string
-    coordinates: number[][][]
+    constructor(init?: Partial<PolygonDto>) {
+        super();
+        Object.assign(this, init);
+    }
 }
