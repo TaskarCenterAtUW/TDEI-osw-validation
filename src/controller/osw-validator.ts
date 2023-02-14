@@ -3,10 +3,11 @@ import { ILoggable } from "nodets-ms-core/lib/core/logger/abstracts/ILoggable";
 import { QueueMessage } from "nodets-ms-core/lib/core/queue";
 import { ITopicSubscription } from "nodets-ms-core/lib/core/queue/abstracts/IMessage-topic";
 import { Topic } from "nodets-ms-core/lib/core/queue/topic";
+import { FileEntity } from "nodets-ms-core/lib/core/storage";
 import { unescape } from "querystring";
 import { environment } from "../environment/environment";
 import { OswUpload } from "../model/event/osw-upload";
-import { OswValidation } from "../model/event/osw-validation";
+import { QueueMessageContent } from "../model/queue-message-model";
 import { IValidator } from "./interface/IValidator";
 
 
@@ -25,8 +26,8 @@ export class OswValidator implements IValidator, ITopicSubscription {
         this.publishingTopic = Core.getTopic(this.publishingTopicName);
         this.logger = Core.getLogger();
         this.listeningTopic.subscribe(this.subscriptionName, this).catch((error) => {
-            console.log('Error while subscribing');
-            console.log(error);
+            console.error('Error while subscribing');
+            console.error(error);
         });
     }
 
@@ -38,48 +39,87 @@ export class OswValidator implements IValidator, ITopicSubscription {
     }
 
     onError(error: Error) {
-        console.log('Received error');
-        console.log(error);
+        console.error('Received error');
+        console.error(error);
     }
 
 
-    validate(message: QueueMessage): void {
-        const oswUploadMessage = OswUpload.from(message.data);
-        console.log(oswUploadMessage.fileUploadPath);
-        //https://xxxx-namespace.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip
-        const fileRelativePath = oswUploadMessage.fileUploadPath?.split('/').splice(-1)[0];
-        if (fileRelativePath) {
-            const filePathClean = unescape(fileRelativePath);
-            const fileName = filePathClean.split('/').splice(-1)[0];
-            console.log(fileName);
-            if (fileName.includes('invalid')) {
-                this.sendStatus(false, oswUploadMessage, 'Invalid file');
-                return;
-            }
-            if (fileName.includes('valid')) {
-                console.log('Valid file');
-                this.sendStatus(true, oswUploadMessage);
-                return;
-            }
-            console.log('Invalid file.. No regex found');
-            this.sendStatus(false, oswUploadMessage, 'No regex found in file ' + fileName);
+    async validate(messageReceived: QueueMessage): Promise<void> {
+        var queueMessage: QueueMessageContent = QueueMessageContent.from(messageReceived.data);
+        if (!queueMessage.response.success) {
+            console.error("Received failed workflow request:", messageReceived);
             return;
+        }
+
+        if (!queueMessage.meta.file_upload_path) {
+            console.error("Request does not have valid file path specified.", messageReceived);
+            return;
+        }
+
+        if (!await queueMessage.hasPermission(["tdei-admin", "poc", "osw_data_generator"])) {
+            return;
+        }
+
+        console.log(queueMessage.meta.file_upload_path);
+        //https://xxxx-namespace.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip
+        let url = unescape(queueMessage.meta.file_upload_path)
+        let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
+        if (fileEntity) {
+            // get the validation result
+            let validationResult = await this.validateOSW(fileEntity, queueMessage);
+            this.sendStatus(queueMessage, validationResult);
+        }
+        else {
+            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' });
         }
     }
 
-    private sendStatus(valid: boolean, uploadMessage: OswUpload, validationMessage: string = '') {
-        var statusMessage = OswValidation.from(uploadMessage);
-        statusMessage.isValid = valid;
-        statusMessage.validationTime = 90; // This is hardcoded.
-        statusMessage.validationMessage = validationMessage;
+    validateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
+        const gtfsUploadRequestInfo = OswUpload.from(queueMessage.request);
+
+        return new Promise((resolve, reject) => {
+
+            try {
+                // let content = file.getStream() // This gets the data stream of the file. This can be used for actual validation
+                const fileName = unescape(file.fileName);
+                console.log(fileName);
+                if (fileName.includes('invalid')) {
+                    // validation failed
+                    resolve({
+                        isValid: false,
+                        validationMessage: 'file name contains invalid'
+                    });
+                }
+                else {
+                    // validation is successful
+                    resolve({
+                        isValid: true,
+                        validationMessage: ''
+                    });
+                }
+            }
+            catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult) {
+        receivedQueueMessage.meta.isValid = result.isValid;
+        receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
+        receivedQueueMessage.meta.validationMessage = result.validationMessage;
         this.publishingTopic.publish(QueueMessage.from(
             {
-                messageId: '98383',
-                message: "Validation complete",
-                messageType: 'oswvalidation',
-                data: statusMessage
+                messageType: 'osw-validation',
+                data: receivedQueueMessage
             }
         ));
     }
 
+}
+
+
+interface ValidationResult {
+    isValid: boolean,
+    validationMessage: string
 }
