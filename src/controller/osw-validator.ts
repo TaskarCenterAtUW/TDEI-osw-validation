@@ -66,7 +66,7 @@ export class OswValidator implements IValidator, ITopicSubscription {
         let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
         if (fileEntity) {
             // get the validation result
-            let validationResult = await this.validateOSW(fileEntity, queueMessage);
+            let validationResult = await this.dummyValidateOSW(fileEntity, queueMessage);//TODO: Replace this with validateOSW actual function.
             this.sendStatus(queueMessage, validationResult,messageReceived);
         }
         else {
@@ -74,7 +74,39 @@ export class OswValidator implements IValidator, ITopicSubscription {
         }
     }
 
+
+    /**
+     * Actual validateOSW function to be prefilled and sent back
+     * @param file - FileEntity
+     * @param queueMessage - QueueMessageContent
+     * @returns Promise<ValidationResult>  with the validation result and message
+     */
     validateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
+        return new Promise(async (resolve,reject)=>{
+            // Write the actual validation code here.
+
+            // Get the file stream from the below code
+            let fileStream = await file.getStream();
+            // Do the rest of the processing
+
+            // To return validation true, use the below line
+            // resolve({isValid:true,validationMessage:''});
+
+            // To return validation fail with message, use the line below
+            // resolve({isValid:false,validationMessage:'Validation Error message'});
+
+
+        });
+    }
+
+
+    /**
+     * Dummy validation using file name
+     * @param file - FileEntity
+     * @param queueMessage  - QueueMessage
+     * @returns Promise<ValidationResult> 
+     */
+    dummyValidateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
         const gtfsUploadRequestInfo = OswUpload.from(queueMessage.request);
 
         return new Promise((resolve, reject) => {
