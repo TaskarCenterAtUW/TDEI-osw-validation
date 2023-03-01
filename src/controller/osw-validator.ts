@@ -67,10 +67,10 @@ export class OswValidator implements IValidator, ITopicSubscription {
         if (fileEntity) {
             // get the validation result
             let validationResult = await this.validateOSW(fileEntity, queueMessage);
-            this.sendStatus(queueMessage, validationResult);
+            this.sendStatus(queueMessage, validationResult,messageReceived);
         }
         else {
-            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' });
+            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' },messageReceived);
         }
     }
 
@@ -104,14 +104,16 @@ export class OswValidator implements IValidator, ITopicSubscription {
         });
     }
 
-    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult) {
+    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult, originalMessage:QueueMessage) {
         receivedQueueMessage.meta.isValid = result.isValid;
         receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
         receivedQueueMessage.meta.validationMessage = result.validationMessage;
         this.publishingTopic.publish(QueueMessage.from(
             {
                 messageType: 'osw-validation',
-                data: receivedQueueMessage
+                data: receivedQueueMessage,
+                message:originalMessage.message,
+                messageId:originalMessage.messageId
             }
         ));
     }
