@@ -25,58 +25,58 @@ Core.initialize();
 
 async function runAllTests() {
 
-var oswContainer = await Core.getStorageClient()?.getContainer('osw');
+    var oswContainer = await Core.getStorageClient()?.getContainer('osw');
 
-var validationTopic = Core.getTopic(environment.eventBus.validationTopic ?? "");
-validationTopic.subscribe(process.env.VALIDATION_SUBSCRIPTION ?? "",{
-    onReceive(message) {
-        // console.log(message);
-        // var content = QueueMessageContent.from(message.data);
-        // console.log(content.meta);
-        onResultReceive(message);
+    var validationTopic = Core.getTopic(environment.eventBus.validationTopic ?? "");
+    validationTopic.subscribe(process.env.VALIDATION_SUBSCRIPTION ?? "", {
+        onReceive(message) {
+            // console.log(message);
+            // var content = QueueMessageContent.from(message.data);
+            // console.log(content.meta);
+            onResultReceive(message);
 
-    },
-    onError(error) {
-        console.log(error);
-    },
-});
-
-harnesstests.tests.forEach(async singleTest => {
-    console.log(singleTest.name);
-    const extension = path.extname(singleTest.input_file);
-    const fileName = path.parse(singleTest.input_file).name;
-    const suffix = randomUUID().toString();
-    const uploadFileName = fileName+suffix+extension;
-    // Read the local file
-    var parentDir = path.join(__dirname,'..');
-    const fh = fs.createReadStream(path.join(parentDir,singleTest.input_file));
-    const newFileOnAzure = oswContainer?.createFile(uploadFileName,'');
-    var fileDetails = await newFileOnAzure?.upload(fh);
-    // Send message to the controller with upload path.
-    var uploadtopic = Core.getTopic( environment.eventBus.uploadTopic ?? "");
-    var templateMessage = QueueMessageContent.from(messageFormat);
-    templateMessage.meta.file_upload_path = "https://tdeisamplestorage.blob.core.windows.net/osw/"+uploadFileName;
-    const message = QueueMessage.from({
-        messageType:'osw-upload',
-        data:templateMessage,
-        message:singleTest.name,
-        messageId:randomUUID().toString()
+        },
+        onError(error) {
+            console.log(error);
+        },
     });
-    await uploadtopic.publish(message);
-    
-});
+
+    harnesstests.tests.forEach(async singleTest => {
+        console.log(singleTest.name);
+        const extension = path.extname(singleTest.input_file);
+        const fileName = path.parse(singleTest.input_file).name;
+        const suffix = randomUUID().toString();
+        const uploadFileName = fileName + suffix + extension;
+        // Read the local file
+        var parentDir = path.join(__dirname, '..');
+        const fh = fs.createReadStream(path.join(parentDir, singleTest.input_file));
+        const newFileOnAzure = oswContainer?.createFile(`test_upload/${uploadFileName}`, '');
+        var fileDetails = await newFileOnAzure?.upload(fh);
+        // Send message to the controller with upload path.
+        var uploadtopic = Core.getTopic(environment.eventBus.uploadTopic ?? "");
+        var templateMessage = QueueMessageContent.from(messageFormat);
+        templateMessage.meta.file_upload_path = "https://tdeisamplestorage.blob.core.windows.net/osw/test_upload/" + uploadFileName;
+        const message = QueueMessage.from({
+            messageType: 'osw-upload',
+            data: templateMessage,
+            message: singleTest.name,
+            messageId: randomUUID().toString()
+        });
+        await uploadtopic.publish(message);
+
+    });
 
 
 }
 
-function onResultReceive( message: QueueMessage) {
+function onResultReceive(message: QueueMessage) {
     // Get the test name from the message
     var testName = message.message;
     var content = QueueMessageContent.from(message.data);
     var result = content.meta.isValid;
     // get the actual test case expected result
-    var actualTestCase = harnesstests.tests.find((e)=>{
-       return e.name == testName;
+    var actualTestCase = harnesstests.tests.find((e) => {
+        return e.name == testName;
     });
     console.log("<---Test case--->")
     console.log(actualTestCase);
@@ -87,6 +87,6 @@ function onResultReceive( message: QueueMessage) {
 
 // console.log(templateMessage);
 
-runAllTests().then((e)=>{
+runAllTests().then((e) => {
     console.log('Completed');
 });
