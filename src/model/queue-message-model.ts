@@ -43,7 +43,7 @@ export class QueueMessageContent extends AbstractDomainEntity {
                 shouldSatisfyAll: false
             });
             // With hosted provider 
-            const authProvider = Core.getAuthorizer({ provider: "Hosted", apiUrl: environment.authPermissionUrl });
+            const authProvider = Core.getAuthorizer({ provider: environment.authProvider, apiUrl: environment.authPermissionUrl });
 
             const response = await authProvider?.hasPermission(permissionRequest);
             return response ?? false;

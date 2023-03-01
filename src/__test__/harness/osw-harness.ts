@@ -55,6 +55,7 @@ async function runAllTests() {
         // Send message to the controller with upload path.
         var uploadtopic = Core.getTopic(environment.eventBus.uploadTopic ?? "");
         var templateMessage = QueueMessageContent.from(messageFormat);
+        // User id with "000000-0000-0000-0000-000000" will simulate result to false else true otherwise. Set .env variable AUTH_SIMULATE=false while testing.
         templateMessage.meta.file_upload_path = "https://tdeisamplestorage.blob.core.windows.net/osw/test_upload/" + uploadFileName;
         const message = QueueMessage.from({
             messageType: 'osw-upload',
@@ -75,7 +76,7 @@ function onResultReceive(message: QueueMessage) {
     var content = QueueMessageContent.from(message.data);
     var result = content.meta.isValid;
     // get the actual test case expected result
-    var actualTestCase = harnesstests.tests.find((e) => {
+    var actualTestCase: any = harnesstests.tests.find((e) => {
         return e.name == testName;
     });
     console.log("<---Test case--->")

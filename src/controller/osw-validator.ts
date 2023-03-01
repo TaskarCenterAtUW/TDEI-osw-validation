@@ -33,7 +33,6 @@ export class OswValidator implements IValidator, ITopicSubscription {
 
     onReceive(message: QueueMessage) {
         console.log('Received message');
-        console.log(message);
         this.validate(message);
 
     }
@@ -60,17 +59,16 @@ export class OswValidator implements IValidator, ITopicSubscription {
             return;
         }
 
-        console.log(queueMessage.meta.file_upload_path);
         //https://xxxx-namespace.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip
         let url = unescape(queueMessage.meta.file_upload_path)
         let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
         if (fileEntity) {
             // get the validation result
             let validationResult = await this.dummyValidateOSW(fileEntity, queueMessage);//TODO: Replace this with validateOSW actual function.
-            this.sendStatus(queueMessage, validationResult,messageReceived);
+            this.sendStatus(queueMessage, validationResult, messageReceived);
         }
         else {
-            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' },messageReceived);
+            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' }, messageReceived);
         }
     }
 
@@ -82,7 +80,7 @@ export class OswValidator implements IValidator, ITopicSubscription {
      * @returns Promise<ValidationResult>  with the validation result and message
      */
     validateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
-        return new Promise(async (resolve,reject)=>{
+        return new Promise(async (resolve, reject) => {
             // Write the actual validation code here.
 
             // Get the file stream from the below code
@@ -136,7 +134,7 @@ export class OswValidator implements IValidator, ITopicSubscription {
         });
     }
 
-    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult, originalMessage:QueueMessage) {
+    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult, originalMessage: QueueMessage) {
         receivedQueueMessage.meta.isValid = result.isValid;
         receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
         receivedQueueMessage.meta.validationMessage = result.validationMessage;
@@ -144,8 +142,8 @@ export class OswValidator implements IValidator, ITopicSubscription {
             {
                 messageType: 'osw-validation',
                 data: receivedQueueMessage,
-                message:originalMessage.message,
-                messageId:originalMessage.messageId
+                message: originalMessage.message,
+                messageId: originalMessage.messageId
             }
         ));
     }

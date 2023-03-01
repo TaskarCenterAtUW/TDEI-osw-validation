@@ -45,6 +45,8 @@ Follow the steps to install the node packages required for both building and run
 |VALIDATION_TOPIC | Validation topic name|
 |EVENT_BUS_CONNECTION | Event bus connection string|
 |AUTH_PERMISSION_URL | Authentication/Authorization url|
+|AUTH_SIMULATE | Boolean flag , set true [test harness]|
+|VALIDATION_SUBSCRIPTION | set to test-osw-validation-subscription [test harness]|
 
 
 ### Messaging
