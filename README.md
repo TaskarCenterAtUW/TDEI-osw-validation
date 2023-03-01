@@ -33,7 +33,7 @@ Follow the steps to install the node packages required for both building and run
 ### Connectivity to cloud
 - Connecting this to cloud will need `.env` file with environment variables mentioned below.
 
-#### Environment variables
+### Environment variables
 |Name| Description |
 |--|--|
 | PROVIDER | Provider for cloud service or local |
