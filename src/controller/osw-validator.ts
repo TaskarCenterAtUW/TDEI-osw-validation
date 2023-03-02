@@ -33,7 +33,6 @@ export class OswValidator implements IValidator, ITopicSubscription {
 
     onReceive(message: QueueMessage) {
         console.log('Received message');
-        console.log(message);
         this.validate(message);
 
     }
@@ -60,21 +59,52 @@ export class OswValidator implements IValidator, ITopicSubscription {
             return;
         }
 
-        console.log(queueMessage.meta.file_upload_path);
         //https://xxxx-namespace.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip
         let url = unescape(queueMessage.meta.file_upload_path)
         let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
         if (fileEntity) {
             // get the validation result
-            let validationResult = await this.validateOSW(fileEntity, queueMessage);
-            this.sendStatus(queueMessage, validationResult);
+            let validationResult = await this.dummyValidateOSW(fileEntity, queueMessage);//TODO: Replace this with validateOSW actual function.
+            this.sendStatus(queueMessage, validationResult, messageReceived);
         }
         else {
-            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' });
+            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' }, messageReceived);
         }
     }
 
+
+    /**
+     * Actual validateOSW function to be prefilled and sent back
+     * @param file - FileEntity
+     * @param queueMessage - QueueMessageContent
+     * @returns Promise<ValidationResult>  with the validation result and message
+     */
     validateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
+        return new Promise(async (resolve, reject) => {
+            // Write the actual validation code here.
+
+            // Get the file stream from the below code
+            let fileStream = await file.getStream();
+            // Do the rest of the processing
+
+            // To return validation true, use the below line
+            // resolve({isValid:true,validationMessage:''});
+
+            // To return validation fail with message, use the line below
+            // resolve({isValid:false,validationMessage:'Validation Error message'});
+
+
+        });
+    }
+
+
+    /**
+     * Dummy validation using file name
+     * @param file - FileEntity
+     * @param queueMessage  - QueueMessage
+     * @returns Promise<ValidationResult> 
+     */
+    dummyValidateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
         const gtfsUploadRequestInfo = OswUpload.from(queueMessage.request);
 
         return new Promise((resolve, reject) => {
@@ -104,14 +134,16 @@ export class OswValidator implements IValidator, ITopicSubscription {
         });
     }
 
-    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult) {
+    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult, originalMessage: QueueMessage) {
         receivedQueueMessage.meta.isValid = result.isValid;
         receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
         receivedQueueMessage.meta.validationMessage = result.validationMessage;
         this.publishingTopic.publish(QueueMessage.from(
             {
                 messageType: 'osw-validation',
-                data: receivedQueueMessage
+                data: receivedQueueMessage,
+                message: originalMessage.message,
+                messageId: originalMessage.messageId
             }
         ));
     }
