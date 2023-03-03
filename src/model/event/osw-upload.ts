@@ -6,8 +6,6 @@ import { PolygonDto } from "../polygon-model";
 export class OswUpload extends AbstractDomainEntity {
     @Prop('tdei_org_id')
     tdeiOrgId?: string;
-    @Prop('tdei_record_id')
-    tdeiRecordId?: string;
     @Prop('collected_by')
     collectedBy?: string;
     @Prop('collection_method')

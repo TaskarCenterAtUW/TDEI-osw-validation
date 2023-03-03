@@ -1,9 +1,11 @@
+import { randomUUID } from "crypto";
 import { Core } from "nodets-ms-core";
 import { ILoggable } from "nodets-ms-core/lib/core/logger/abstracts/ILoggable";
 import { QueueMessage } from "nodets-ms-core/lib/core/queue";
 import { ITopicSubscription } from "nodets-ms-core/lib/core/queue/abstracts/IMessage-topic";
 import { Topic } from "nodets-ms-core/lib/core/queue/topic";
 import { FileEntity } from "nodets-ms-core/lib/core/storage";
+import { resolve } from "path";
 import { unescape } from "querystring";
 import { environment } from "../environment/environment";
 import { OswUpload } from "../model/event/osw-upload";
@@ -34,7 +36,6 @@ export class OswValidator implements IValidator, ITopicSubscription {
     onReceive(message: QueueMessage) {
         console.log('Received message');
         this.validate(message);
-
     }
 
     onError(error: Error) {
@@ -44,41 +45,55 @@ export class OswValidator implements IValidator, ITopicSubscription {
 
 
     async validate(messageReceived: QueueMessage): Promise<void> {
-        var queueMessage: QueueMessageContent = QueueMessageContent.from(messageReceived.data);
-        if (!queueMessage.response.success) {
-            console.error("Received failed workflow request:", messageReceived);
-            return;
-        }
+        var tdeiRecordId = "";
+        try {
+            var queueMessage: QueueMessageContent = QueueMessageContent.from(messageReceived.data);
+            tdeiRecordId = queueMessage.tdeiRecordId!;
 
-        if (!queueMessage.meta.file_upload_path) {
-            console.error("Request does not have valid file path specified.", messageReceived);
-            return;
-        }
+            console.log("Received message for : ", queueMessage.tdeiRecordId, "Message received for osw validation !");
 
-        if (!await queueMessage.hasPermission(["tdei-admin", "poc", "osw_data_generator"])) {
-            return;
-        }
+            if (!queueMessage.response.success) {
+                let errorMessage = "Received failed workflow request";
+                console.error(queueMessage.tdeiRecordId, errorMessage, messageReceived);
+                return Promise.resolve();
+            }
 
-        //https://xxxx-namespace.blob.core.windows.net/osw/2022%2FNOVEMBER%2F101%2Ffile_1669110207839_1518e1dd1d4741a19a5dbed8f9b8d0a1.zip
-        let url = unescape(queueMessage.meta.file_upload_path)
-        let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
-        if (fileEntity) {
-            // get the validation result
-            let validationResult = await this.dummyValidateOSW(fileEntity, queueMessage);//TODO: Replace this with validateOSW actual function.
-            this.sendStatus(queueMessage, validationResult, messageReceived);
-        }
-        else {
-            this.sendStatus(queueMessage, { isValid: false, validationMessage: 'File entity not found' }, messageReceived);
+            if (!queueMessage.meta.file_upload_path) {
+                let errorMessage = "Request does not have valid file path specified.";
+                console.error(queueMessage.tdeiRecordId, errorMessage, messageReceived);
+                throw Error(errorMessage);
+            }
+
+            if (!await queueMessage.hasPermission(["tdei-admin", "poc", "osw_data_generator"])) {
+                let errorMessage = "Unauthorized request !";
+                console.error(queueMessage.tdeiRecordId, errorMessage);
+                throw Error(errorMessage);
+            }
+
+            let url = unescape(queueMessage.meta.file_upload_path)
+            let fileEntity = await Core.getStorageClient()?.getFileFromUrl(url);
+            if (fileEntity) {
+                let validationResult = await this.dummyValidateOSW(fileEntity, queueMessage);//TODO: Replace this with validateOSW actual function.
+                this.sendStatus(validationResult, messageReceived);
+            }
+            else {
+                throw Error("File entity not found");
+            }
+        } catch (error) {
+            console.error(tdeiRecordId, 'Error occured while validating osw request', error);
+            this.sendStatus({ isValid: false, validationMessage: 'Error occured while validating osw request' + error }, messageReceived);
+            return Promise.resolve();
         }
     }
 
+    getFileEntity(queueMessage: QueueMessageContent) { }
 
     /**
-     * Actual validateOSW function to be prefilled and sent back
-     * @param file - FileEntity
-     * @param queueMessage - QueueMessageContent
-     * @returns Promise<ValidationResult>  with the validation result and message
-     */
+    * Actual validateOSW function to be prefilled and sent back
+    * @param file - FileEntity
+    * @param queueMessage - QueueMessageContent
+    * @returns Promise<ValidationResult>  with the validation result and message
+    */
     validateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
         return new Promise(async (resolve, reject) => {
             // Write the actual validation code here.
@@ -104,14 +119,14 @@ export class OswValidator implements IValidator, ITopicSubscription {
      * @param queueMessage  - QueueMessage
      * @returns Promise<ValidationResult> 
      */
-    dummyValidateOSW(file: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
-        const gtfsUploadRequestInfo = OswUpload.from(queueMessage.request);
+    dummyValidateOSW(fileEntity: FileEntity, queueMessage: QueueMessageContent): Promise<ValidationResult> {
+        var request: OswUpload = OswUpload.from(queueMessage.request);
+        console.log(queueMessage.tdeiRecordId, "Validating osw request started !");
 
-        return new Promise((resolve, reject) => {
-
+        return new Promise(async (resolve, reject) => {
             try {
                 // let content = file.getStream() // This gets the data stream of the file. This can be used for actual validation
-                const fileName = unescape(file.fileName);
+                const fileName = unescape(fileEntity.fileName);
                 console.log(fileName);
                 if (fileName.includes('invalid')) {
                     // validation failed
@@ -127,28 +142,38 @@ export class OswValidator implements IValidator, ITopicSubscription {
                         validationMessage: ''
                     });
                 }
+                console.log(queueMessage.tdeiRecordId, "Validating osw request completed !");
             }
             catch (e) {
-                reject(e);
+                console.error(queueMessage.tdeiRecordId, "Validating osw request encountered error !", e);
+                reject({
+                    isValid: false,
+                    validationMessage: e
+                });
             }
         });
     }
 
-    private sendStatus(receivedQueueMessage: QueueMessageContent, result: ValidationResult, originalMessage: QueueMessage) {
-        receivedQueueMessage.meta.isValid = result.isValid;
-        receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
-        receivedQueueMessage.meta.validationMessage = result.validationMessage;
-        receivedQueueMessage.stage = 'osw-validation';
+    private sendStatus(result: ValidationResult, queueMessage: QueueMessage) {
+        var queueMessageContent: QueueMessageContent = QueueMessageContent.from(queueMessage.data);
+        //Set validation result
+        queueMessageContent.meta.isValid = result.isValid;
+        queueMessageContent.meta.validationMessage = result.validationMessage;
+        queueMessageContent.stage = 'osw-validation';
+        //Set response
+        queueMessageContent.response.success = result.isValid;
+        queueMessageContent.response.message = result.validationMessage;
         this.publishingTopic.publish(QueueMessage.from(
             {
                 messageType: 'osw-validation',
-                data: receivedQueueMessage,
-                message: originalMessage.message,
-                messageId: originalMessage.messageId
+                data: queueMessageContent,
+                publishedDate: new Date(),
+                message: "OSW validation output",
+                messageId: randomUUID().toString()
             }
         ));
+        console.log("Publishing message for : ", queueMessageContent.tdeiRecordId);
     }
-
 }
 
 
