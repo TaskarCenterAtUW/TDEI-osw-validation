@@ -138,6 +138,7 @@ export class OswValidator implements IValidator, ITopicSubscription {
         receivedQueueMessage.meta.isValid = result.isValid;
         receivedQueueMessage.meta.validationTime = 90; // This is hardcoded.
         receivedQueueMessage.meta.validationMessage = result.validationMessage;
+        receivedQueueMessage.stage = 'osw-validation';
         this.publishingTopic.publish(QueueMessage.from(
             {
                 messageType: 'osw-validation',
