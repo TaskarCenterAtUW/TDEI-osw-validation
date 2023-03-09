@@ -27,7 +27,7 @@ Follow the steps to install the node packages required for both building and run
     ```
 2. To start the server, use the command `npm run start`
 3. The http server by default starts with 8080 port or whatever is declared in `process.env.APPLICATION_PORT`
-5. A `ping` with get and post. Make `get` or `post` request to `http://localhost:8080/health/ping`
+4. A `ping` with get and post. Make `get` or `post` request to `http://localhost:8080/health/ping`
 
 
 ### Connectivity to cloud
@@ -63,11 +63,11 @@ graph LR;
 ```
 #### Incoming
 The incoming messages will be from the upload queue `osw-upload`.
-The format is mentioned in [msg-osw-upload.json](./src/assets/msg-osw-upload-message.json)
+The format is mentioned in [msg-osw-upload.json](https://github.com/TaskarCenterAtUW/TDEI-event-messages/blob/dev/event/osw-upload.json)
 
 #### Outgoing
 The outgoing messages will be to the `osw-validation` topic.
-The format of the message is at [osw-validation.json](./src/assets/msg-osw-validation.json)
+The format of the message is at [osw-validation.json](https://github.com/TaskarCenterAtUW/TDEI-event-messages/blob/dev/event/osw-validation.json)
 
 
 
