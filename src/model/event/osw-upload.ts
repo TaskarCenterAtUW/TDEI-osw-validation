@@ -1,6 +1,6 @@
 import { IsOptional } from "class-validator";
+import { FeatureCollection } from "geojson";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
-import { PolygonDto } from "../polygon-model";
 
 //Describes a gtfs flex file meta data.
 export class OswUpload extends AbstractDomainEntity {
@@ -24,5 +24,5 @@ export class OswUpload extends AbstractDomainEntity {
     dataSource?: string;
     @Prop()
     @IsOptional()
-    polygon!: PolygonDto;
+    polygon!: FeatureCollection;
 }
