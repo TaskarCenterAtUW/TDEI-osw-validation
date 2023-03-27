@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { ServiceProvider } from 'nodets-ms-core/lib/types/provider';
 dotenv.config();
 /**
  * Contains all the configurations required for setting up the core project
@@ -11,7 +12,9 @@ export const environment = {
         connectionString: process.env.EVENT_BUS_CONNECTION,
         uploadTopic: process.env.UPLOAD_TOPIC,
         uploadSubscription: process.env.UPLOAD_SUBSCRIPTION,
-        validationTopic: process.env.VALIDATION_TOPIC,
+        validationTopic: process.env.VALIDATION_TOPIC
     },
-    appPort: parseInt(process.env.PORT as string) || 3000
+    appPort: parseInt(process.env.APPLICATION_PORT ?? "8080"),
+    authPermissionUrl: process.env.AUTH_PERMISSION_URL,
+    authProvider: <ServiceProvider>(process.env.AUTH_SIMULATE ? "Simulated" : "Hosted")
 }

@@ -21,4 +21,5 @@ class HealthController implements IController {
     }
 }
 
-export default HealthController;
+const healthController = new HealthController();
+export default healthController;

@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "TC1: Valid Flex Test",
+      "input_file": "asset/test_files/valid.zip",
+      "message_data": "asset/test_data/osw_test_case1.json",
+      "expected_result": true
+    },
+    {
+      "name": "TC2: Failed Flex Test",
+      "input_file": "asset/test_files/invalid.zip",
+      "message_data": "asset/test_data/osw_test_case2.json",
+      "expected_result": false
+    }
+  ]
+}

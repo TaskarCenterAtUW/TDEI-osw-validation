@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import helmet from "helmet";
 import { OswValidator } from "./controller/osw-validator";
 import { IController } from "./controller/interface/IController";
+import { errorHandler } from "./middleware/error-handler-middleware";
+import { unhandledExceptionAndRejectionHandler } from "./middleware/unhandled-exception-rejection-handler";
 
 class App {
     public app: express.Application;
@@ -12,10 +14,15 @@ class App {
     constructor(controllers: IController[], port: number) {
         this.app = express();
         this.port = port;
+        //First middleware to be registered: after express init
+        unhandledExceptionAndRejectionHandler();
 
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
         this.validator = new OswValidator();
+
+        //Last middleware to be registered: error handler. 
+        this.app.use(errorHandler);
     }
 
     private initializeMiddlewares() {
