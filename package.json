@@ -7,17 +7,18 @@
     "test": "npm run build  && npm run copy:assets && copy:test-env && jest ./build",
     "build": "rimraf ./build && tsc",
     "start": "npm run build && npm run copy:env && node build/server.js",
-    "test-harness":"npm run build && npm run copy:env && npm run copy:harness-assets && node build/__test__/harness/osw-harness.js",
+    "test-harness": "npm run build && npm run copy:env && npm run copy:harness-assets && node build/__test__/harness/osw-harness.js",
     "start:dev": "nodemon",
     "copy:assets": "cp -r 'src/assets/' 'build/assets/'",
     "copy:env": "cp .env 'build/.env'",
     "copy:test-env": "cp .test.env 'build/.test.env'",
-    "copy:harness-assets":"cp -r 'src/__test__/asset/' 'build/__test__/asset/'"
+    "copy:harness-assets": "cp -r 'src/__test__/asset/' 'build/__test__/asset/'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/geojson": "7946.0.10",
     "@types/body-parser": "^1.19.2",
     "@types/express": "^4.17.14",
     "@types/helmet": "^4.0.0",
