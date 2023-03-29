@@ -7,7 +7,7 @@
     "collection_method": "manual",
     "valid_from": "2022-11-22T09:43:07.978Z",
     "valid_to": "2022-11-22T09:43:07.978Z",
-    "data_source": "local",
+    "data_source": "InHouse",
     "polygon": {
       "type": "FeatureCollection",
       "features": [
