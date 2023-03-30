@@ -70,4 +70,19 @@ The outgoing messages will be to the `osw-validation` topic.
 The format of the message is at [osw-validation.json](https://github.com/TaskarCenterAtUW/TDEI-event-messages/blob/dev/event/osw-validation.json)
 
 
+### Test Harness
+Test harness is written to test the end to end flow of OSW-validation. Test will read the test cases from [tests.json](./src/__test__/asset/tests.json) and simulate the upload queue request using payload data located at [osw_test_case*.json](./src/__test__/asset/test_data/) and parallel osw validation service which is running will subscribe to the queue messages and process the validation. 
 
+#### Steps to run test harness
+
+ 1. Open the new terminal at the source root and execute below command
+ ```
+npm run start
+```
+This action will start listening to the queue messages for validation and publishes the results to the validation result topic.
+
+2.  Open the second new terminal at the source root and execute below command
+ ```
+npm run test-harness
+```
+This action will simulate the queue messages as per the written test cases and will subscribe to the results published by validation service. we should see the test case result summary on the console. 
