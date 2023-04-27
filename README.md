@@ -36,16 +36,14 @@ Follow the steps to install the node packages required for both building and run
 ### Environment variables
 |Name| Description |
 |--|--|
-| PROVIDER | Provider for cloud service or local |
+|PROVIDER | Provider for cloud service or local (optional) |
 |QUEUECONNECTION | Queue connection string |
 |STORAGECONNECTION | Storage connection string|
-|APPLICATION_PORT |Port on which application will run|
+|PORT |Port on which application will run|
 |UPLOAD_SUBSCRIPTION | Upload topic subscription name|
 |UPLOAD_TOPIC | Upload topic name|
 |VALIDATION_TOPIC | Validation topic name|
-|EVENT_BUS_CONNECTION | Event bus connection string|
 |AUTH_PERMISSION_URL | Authentication/Authorization url|
-|AUTH_SIMULATE | Boolean flag , set true [test harness]|
 |VALIDATION_SUBSCRIPTION | set to test-osw-validation-subscription [test harness]|
 
 
