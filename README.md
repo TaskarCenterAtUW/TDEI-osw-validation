@@ -84,3 +84,21 @@ This action will start listening to the queue messages for validation and publis
 npm run test-harness
 ```
 This action will simulate the queue messages as per the written test cases and will subscribe to the results published by validation service. we should see the test case result summary on the console. 
+
+## Integration tests enumeration
+| Component | Feature under test | Scenario | Expectation | Status |
+|-|-|-|-|-|
+| Osw Validator | Servicebus Integration | Subscribe to upload topic to verify service bus integration | Expect to return message | :white_check_mark: |
+| Osw Validator | Servicebus Integration | Should publish a message to be received on the topic | Expect to receive message on the target topic | :white_check_mark: |
+| OSW Validator | Storage Integration| Fetching a file returns a file entity | Expect to return the file entity|:white_check_mark:|
+| OSW Validator | Auth integration | When requesting authorization permission| expect to return status 200| :white_check_mark:|
+
+## How to run integration tests
+- For integration tests to run, a `.env` file is required (can be received on request)
+- After adding the .env file in the root directory, run the following commands
+
+`npm run i`
+
+`npm run test:integration`
+
+Note: To run the integration tests, a subscription of name `osw-validation-test`
