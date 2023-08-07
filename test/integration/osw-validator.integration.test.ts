@@ -31,7 +31,7 @@ describe("OSW Validation service Integration test", ()=>{
         const receiveFunction = jest.spyOn(validator,'onReceive').mockImplementation();
         validator.startListening();
         await uploadTopic.publish(message);
-        await delay(300); // Have to wait to get the callback
+        await delay(1000); // Have to wait to get the callback
         expect(receiveFunction).toHaveBeenCalledTimes(1);
 
     }, 60000);
@@ -47,7 +47,7 @@ describe("OSW Validation service Integration test", ()=>{
         // Get the topic of subscription from upload topic
         const validationTopic = Core.getTopic(process.env.VALIDATION_TOPIC as string)
         const receiveFn = jest.fn()
-        validationTopic.subscribe('osw-validation-test',{
+       await validationTopic.subscribe('temp-validation-result',{
             onReceive(message) {
                 receiveFn();
             },
