@@ -88,7 +88,8 @@ This action will simulate the queue messages as per the written test cases and w
 ## Integration tests enumeration
 | Component | Feature under test | Scenario | Expectation | Status |
 |-|-|-|-|-|
-| Osw Validator | Servicebus Integration | Subscribe to upload topic to verify service bus integration | Expecte to return message | :white_check_mark: |
+| Osw Validator | Servicebus Integration | Subscribe to upload topic to verify service bus integration | Expect to return message | :white_check_mark: |
+| Osw Validator | Servicebus Integration | Should publish a message to be received on the topic | Expect to receive message on the target topic | :white_check_mark: |
 | OSW Validator | Storage Integration| Fetching a file returns a file entity | Expect to return the file entity|:white_check_mark:|
 | OSW Validator | Auth integration | When requesting authorization permission| expect to return status 200| :white_check_mark:|
 
@@ -99,3 +100,5 @@ This action will simulate the queue messages as per the written test cases and w
 `npm run i`
 
 `npm run test:integration`
+
+Note: To run the integration tests, a subscription of name `osw-validation-test`

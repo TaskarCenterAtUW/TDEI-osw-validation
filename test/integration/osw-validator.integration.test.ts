@@ -5,6 +5,7 @@ import {OswValidator} from "../../src/controller/osw-validator";
 require('dotenv').config()
 
 import oswUploadsuccessMessage from "../test-data/osw-upload-success.json";
+import oswValidationsuccessMessage from '../test-data/osw-validation-result.json';
 import { QueueMessage } from "nodets-ms-core/lib/core/queue";
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 // jest.mock('../../src/controller/osw-validator')
@@ -36,7 +37,6 @@ describe("OSW Validation service Integration test", ()=>{
     }, 60000);
 
     test('Message posted to service bus is received on the target topic', async ()=>{
-        
         if (!process.env.QUEUECONNECTION) {
             console.error("QUEUECONNECTION environment not set");
             expect(process.env.QUEUECONNECTION != undefined && process.env.QUEUECONNECTION != null).toBeTruthy();
@@ -45,13 +45,19 @@ describe("OSW Validation service Integration test", ()=>{
         // Mock the osw-validation service and see if the actual receiver is getting called.
         var validator = new OswValidator();
         // Get the topic of subscription from upload topic
-        const uploadTopic = Core.getTopic(process.env.UPLOAD_TOPIC as string)
-        const message = QueueMessage.from(oswUploadsuccessMessage);
-        const receiveFunction = jest.spyOn(validator,'onReceive').mockImplementation();
-        validator.startListening();
-        await uploadTopic.publish(message);
+        const validationTopic = Core.getTopic(process.env.VALIDATION_TOPIC as string)
+        const receiveFn = jest.fn()
+        validationTopic.subscribe('osw-validation-test',{
+            onReceive(message) {
+                receiveFn();
+            },
+            onError(error) {
+                
+            },
+        })
+        await validator.publishingTopic.publish(QueueMessage.from(oswValidationsuccessMessage))
         await delay(300); // Have to wait to get the callback
-        expect(receiveFunction).toHaveBeenCalledTimes(1);
+        expect(receiveFn).toHaveBeenCalledTimes(1);
     }, 60000);
 
     test('Fetching a file returns a file entity to verify Storage Integration', async ()=>{
@@ -82,5 +88,5 @@ describe("OSW Validation service Integration test", ()=>{
         const response = await authProvider?.hasPermission(permissionRequest);
         //Assert
         expect(response).toBeFalsy();
-    })
+    },15000)
 })
