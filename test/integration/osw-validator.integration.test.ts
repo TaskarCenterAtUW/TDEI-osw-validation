@@ -7,6 +7,7 @@ require('dotenv').config()
 import oswUploadsuccessMessage from "../test-data/osw-upload-success.json";
 import oswValidationsuccessMessage from '../test-data/osw-validation-result.json';
 import { QueueMessage } from "nodets-ms-core/lib/core/queue";
+import { environment } from "../../src/environment/environment";
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 // jest.mock('../../src/controller/osw-validator')
 
@@ -16,6 +17,9 @@ describe("OSW Validation service Integration test", ()=>{
     })
     beforeAll(()=>{
         Core.initialize();
+        environment.eventBus.uploadTopic = 'temp-upload';
+        environment.eventBus.uploadSubscription = 'upload-validation-processor';
+        environment.eventBus.validationTopic = 'temp-validation';
     })
     test('Subscribe to upload topic to verify servicebus integration', async ()=>{
         if (!process.env.QUEUECONNECTION) {
@@ -26,12 +30,12 @@ describe("OSW Validation service Integration test", ()=>{
         // Mock the osw-validation service and see if the actual receiver is getting called.
         var validator = new OswValidator();
         // Get the topic of subscription from upload topic
-        const uploadTopic = Core.getTopic(process.env.UPLOAD_TOPIC as string)
+        const uploadTopic = Core.getTopic(environment.eventBus.uploadTopic as string)
         const message = QueueMessage.from(oswUploadsuccessMessage);
         const receiveFunction = jest.spyOn(validator,'onReceive').mockImplementation();
         validator.startListening();
         await uploadTopic.publish(message);
-        await delay(1000); // Have to wait to get the callback
+        await delay(5000); // Have to wait to get the callback
         expect(receiveFunction).toHaveBeenCalledTimes(1);
 
     }, 60000);
@@ -45,7 +49,7 @@ describe("OSW Validation service Integration test", ()=>{
         // Mock the osw-validation service and see if the actual receiver is getting called.
         var validator = new OswValidator();
         // Get the topic of subscription from upload topic
-        const validationTopic = Core.getTopic(process.env.VALIDATION_TOPIC as string)
+        const validationTopic = Core.getTopic(environment.eventBus.validationTopic as string)
         const receiveFn = jest.fn()
        await validationTopic.subscribe('temp-validation-result',{
             onReceive(message) {
