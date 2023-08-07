@@ -20,6 +20,7 @@ class App {
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
         this.validator = new OswValidator();
+        this.validator.startListening();
 
         //Last middleware to be registered: error handler. 
         this.app.use(errorHandler);

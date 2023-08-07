@@ -1,0 +1,61 @@
+{
+    "publishedDate": "2023-04-14T07:12:05.664109865Z",
+    "message": "",
+    "data": {
+        "stage": "OSW-Upload",
+        "request": {
+            "tdei_org_id": "66c85a5a-2335-4b97-a0a3-0bb93cba1ae5",
+            "collected_by": "Collector name",
+            "collection_date": "2023-03-03T02:22:45.374Z",
+            "collection_method": "manual",
+            "publication_date": "2023-03-02T04:22:42.493Z",
+            "data_source": "InHouse",
+            "polygon": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [
+                                    [
+                                        76.098506,
+                                        13.10843
+                                    ],
+                                    [
+                                        73.363138,
+                                        12.706453
+                                    ],
+                                    [
+                                        75.10212,
+                                        12.851911
+                                    ],
+                                    [
+                                        75.910285,
+                                        13.659668
+                                    ],
+                                    [
+                                        76.098506,
+                                        13.10843
+                                    ]
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "osw_schema_version": "v0.1"
+        },
+        "meta": {
+            "file_upload_path": "https://tdeisamplestorage.blob.core.windows.net/osw/2023%2FAPRIL%2F66c85a5a-2335-4b97-a0a3-0bb93cba1ae5%2Fosw-test-upload_19df12452cae4da5a71db3fa276f4f5e.zip"
+        },
+        "response": {
+            "success": true,
+            "message": "File uploaded for the Organization : 66c85a5a-2335-4b97-a0a3-0bb93cba1ae5 with tdei record id : 19df12452cae4da5a71db3fa276f4f5e"
+        },
+        "tdei_record_id": "19df12452cae4da5a71db3fa276f4f5e",
+        "tdei_org_id": "66c85a5a-2335-4b97-a0a3-0bb93cba1ae5",
+        "user_id": "c59d29b6-a063-4249-943f-d320d15ac9ab"
+    }
+}

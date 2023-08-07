@@ -27,6 +27,9 @@ export class OswValidator implements IValidator, ITopicSubscription {
         this.listeningTopic = Core.getTopic(this.listeningTopicName);
         this.publishingTopic = Core.getTopic(this.publishingTopicName);
         this.logger = Core.getLogger();
+    }
+
+    startListening(){
         this.listeningTopic.subscribe(this.subscriptionName, this).catch((error) => {
             console.error('Error while subscribing');
             console.error(error);
@@ -163,7 +166,7 @@ export class OswValidator implements IValidator, ITopicSubscription {
         //Set response
         queueMessageContent.response.success = result.isValid;
         queueMessageContent.response.message = result.validationMessage;
-        this.publishingTopic.publish(QueueMessage.from(
+        this.publishingTopic?.publish(QueueMessage.from(
             {
                 messageType: 'osw-validation',
                 data: queueMessageContent,
