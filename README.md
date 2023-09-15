@@ -102,3 +102,4 @@ This action will simulate the queue messages as per the written test cases and w
 `npm run test:integration`
 
 Note: To run the integration tests, a subscription of name `osw-validation-test`
+test
